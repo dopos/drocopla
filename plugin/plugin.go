@@ -7,7 +7,9 @@ package plugin
 import (
 	"context"
 	"runtime"
-	"fmt"
+	"strings"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/drone/drone-go/drone"
 	"github.com/drone/drone-go/plugin/converter"
@@ -22,16 +24,27 @@ type plugin struct {
 }
 
 func (p *plugin) Convert(ctx context.Context, req *converter.Request) (*drone.Config, error) {
+	// check type is yaml
+	if strings.HasSuffix(req.Repo.Config, ".yml") == false {
+		return nil, nil
+	}
+
+	requestLogger := logrus.WithFields(logrus.Fields{
+		"repo_name": req.Repo.Name,
+	})
 
 	// get the configuration file from the request.
 	config := req.Config.Data
 
+	requestLogger.WithFields(logrus.Fields{
+		"req":  req,
+		"os":   runtime.GOOS,
+		"arch": runtime.GOARCH,
+	}).Infoln("initiated")
 	// TODO this should be modified or removed. For
 	// demonstration purposes we make a simple modification
 	// to the configuration file and add a newline.
 	config = config + "\n"
-	fmt.Println(runtime.GOOS)
-	fmt.Println(runtime.GOARCH)
 	// returns the modified configuration file.
 	return &drone.Config{
 		Data: config,
