@@ -1,12 +1,9 @@
 FROM ghcr.io/dopos/golang-alpine:v1.16.10-alpine3.14.3
 
-ENV DROCOPLA_VERSION 0.1.0
-RUN apk add --no-cache git curl
-
 WORKDIR /opt/drocopla
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.version=`git describe --tags --always`" -a ./cmd/drocopla
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.version=`git describe --tags --always`" -a .
 
 FROM scratch
 
