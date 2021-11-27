@@ -6,6 +6,8 @@ package plugin
 
 import (
 	"context"
+	"fmt"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -14,6 +16,13 @@ import (
 	"github.com/drone/drone-go/drone"
 	"github.com/drone/drone-go/plugin/converter"
 )
+
+var Platform string
+var Re = regexp.MustCompile("\nsteps:\n")
+
+func init() {
+	Platform = fmt.Sprintf("\n# drocopla\nplatform: %s/%s\nsteps:\n", runtime.GOOS, runtime.GOARCH)
+}
 
 // New returns a new conversion plugin.
 func New() converter.Plugin {
@@ -36,15 +45,17 @@ func (p *plugin) Convert(ctx context.Context, req *converter.Request) (*drone.Co
 	// get the configuration file from the request.
 	config := req.Config.Data
 
+	if !strings.Contains(config, "\nplatform:\n") {
+		config = Re.ReplaceAllString(config, Platform)
+		fmt.Printf("Replaced to: %s\n", config)
+	}
+
 	requestLogger.WithFields(logrus.Fields{
 		"req":  req,
 		"os":   runtime.GOOS,
 		"arch": runtime.GOARCH,
 	}).Infoln("initiated")
-	// TODO this should be modified or removed. For
-	// demonstration purposes we make a simple modification
-	// to the configuration file and add a newline.
-	config = config + "\n"
+
 	// returns the modified configuration file.
 	return &drone.Config{
 		Data: config,
