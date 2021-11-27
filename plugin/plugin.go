@@ -17,11 +17,20 @@ import (
 	"github.com/drone/drone-go/plugin/converter"
 )
 
+const PlatformFmt = `
+# drocopla
+platform:
+  os: %s
+  arch: %s
+
+steps:
+`
+
 var Platform string
 var Re = regexp.MustCompile("\nsteps:\n")
 
 func init() {
-	Platform = fmt.Sprintf("\n# drocopla\nplatform: %s/%s\nsteps:\n", runtime.GOOS, runtime.GOARCH)
+	Platform = fmt.Sprintf(PlatformFmt, runtime.GOOS, runtime.GOARCH)
 }
 
 // New returns a new conversion plugin.
@@ -39,7 +48,7 @@ func (p *plugin) Convert(ctx context.Context, req *converter.Request) (*drone.Co
 	}
 
 	requestLogger := logrus.WithFields(logrus.Fields{
-		"repo_name": req.Repo.Name,
+		//		"repo_name": req.Repo.Name,
 	})
 
 	// get the configuration file from the request.

@@ -4,11 +4,37 @@
 
 package plugin
 
-import "testing"
+import (
+	"context"
+	"fmt"
+	"testing"
+
+	"github.com/drone/drone-go/drone"
+	"github.com/drone/drone-go/plugin/converter"
+)
 
 func TestPlugin(t *testing.T) {
 	t.Skip()
 
-	// New().Convert(context.Background(),&converter.Request{Config:&})
+}
 
+func TestPluginReplace(t *testing.T) {
+
+	yaml := `---
+kind: pipeline
+type: docker
+name: app
+
+steps:
+
+- name: deploy_local
+`
+	rv, err := New().Convert(context.Background(), &converter.Request{
+		Repo:   drone.Repo{Config: ".done.yml"},
+		Config: drone.Config{Data: yaml},
+	})
+	if err == nil {
+		fmt.Printf("rv: %v", rv.Data)
+
+	}
 }
