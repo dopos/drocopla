@@ -4,6 +4,19 @@ A drone.io conversion extension to set host platform as drone pipeline platform.
 
 _Please note this project requires Drone server version 1.4 or higher._
 
+Default drone behaviour:
+
+If `os/arch` is not set in `.drone.yml` - fill them with `linux/amd64`.
+
+As result, such pipelines becomes not available for drone-runners on non-default plaforms.
+Meanwhile, if you set platform values in `.drone.yml`, such pipelines becomes not available for drone-runners on other plaforms
+
+**drocopla** adds to `.drone.yml` platform tags with values from its runtime.
+
+If `.drone.yml` contains platform tag, it does nothing.
+
+There is a [fix for drone.io sources](https://github.com/LeKovr/drone/commit/886f18f8ad368e4b7c8882d70f709f9535bd277f) which solves the same problem, but it is not merged yet.
+
 ## Installation
 
 Create a shared secret:

@@ -47,23 +47,22 @@ func (p *plugin) Convert(ctx context.Context, req *converter.Request) (*drone.Co
 		return nil, nil
 	}
 
-	requestLogger := logrus.WithFields(logrus.Fields{
-		//		"repo_name": req.Repo.Name,
-	})
+	requestLogger := logrus.WithField("repo_name", req.Repo.Name)
+	requestLogger.WithFields(logrus.Fields{
+		"os":   runtime.GOOS,
+		"arch": runtime.GOARCH,
+	}).Infoln("initiated")
 
 	// get the configuration file from the request.
 	config := req.Config.Data
 
-	if !strings.Contains(config, "\nplatform:\n") {
-		config = Re.ReplaceAllString(config, Platform)
-		fmt.Printf("Replaced to: %s\n", config)
+	if strings.Contains(config, "\nplatform:\n") {
+		// platform is set, skip
+		return nil, nil
 	}
 
-	requestLogger.WithFields(logrus.Fields{
-		"req":  req,
-		"os":   runtime.GOOS,
-		"arch": runtime.GOARCH,
-	}).Infoln("initiated")
+	config = Re.ReplaceAllString(config, Platform)
+	requestLogger.WithField("result", config).Debug("replaced")
 
 	// returns the modified configuration file.
 	return &drone.Config{

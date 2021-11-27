@@ -7,20 +7,18 @@ package plugin
 import (
 	"context"
 	"fmt"
+	"runtime"
 	"testing"
+
+	//	"github.com/sirupsen/logrus"
 
 	"github.com/drone/drone-go/drone"
 	"github.com/drone/drone-go/plugin/converter"
 )
 
-func TestPlugin(t *testing.T) {
-	t.Skip()
+func TestPluginReplaceOKSingle(t *testing.T) {
 
-}
-
-func TestPluginReplace(t *testing.T) {
-
-	yaml := `---
+	in := `---
 kind: pipeline
 type: docker
 name: app
@@ -29,12 +27,47 @@ steps:
 
 - name: deploy_local
 `
+	out := fmt.Sprintf(`---
+kind: pipeline
+type: docker
+name: app
+
+# drocopla
+platform:
+  os: %s
+  arch: %s
+
+steps:
+
+- name: deploy_local
+`, runtime.GOOS, runtime.GOARCH)
+	//logrus.SetLevel(logrus.DebugLevel)
 	rv, err := New().Convert(context.Background(), &converter.Request{
 		Repo:   drone.Repo{Config: ".done.yml"},
-		Config: drone.Config{Data: yaml},
+		Config: drone.Config{Data: in},
 	})
-	if err == nil {
-		fmt.Printf("rv: %v", rv.Data)
+	if err != nil {
+		t.Error(err)
+	}
+	if rv.Data != out {
+		t.Errorf("Result not equal.\nwant:\n%s\ngot:\n%s\n", out, rv.Data)
+	}
+}
 
+func TestPluginNoReplace(t *testing.T) {
+
+	in := `---
+platform:
+`
+	//logrus.SetLevel(logrus.DebugLevel)
+	rv, err := New().Convert(context.Background(), &converter.Request{
+		Repo:   drone.Repo{Config: ".done.yml"},
+		Config: drone.Config{Data: in},
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	if rv != nil {
+		t.Errorf("Result must be nil. Got: %+v", rv)
 	}
 }
